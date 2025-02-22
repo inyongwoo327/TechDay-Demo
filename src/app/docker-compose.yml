@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"  # LocalStack gateway port
+      - "4571-4599:4571-4599"  # Various AWS services
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOCALSTACK_SERVICES=s3,dynamodb  # Only the services you need
+      - DEBUG=1
+    volumes:
+      - "./data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - app-network
+
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_ENDPOINT=http://localstack:4566
+      - DYNAMODB_ENDPOINT=http://localstack:4566
+      - AWS_DEFAULT_REGION=eu-west-1
+    depends_on:
+      - localstack
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+

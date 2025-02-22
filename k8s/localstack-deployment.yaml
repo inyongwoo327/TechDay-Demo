@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstack
+  labels:
+    app: localstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: localstack
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+        - name: localstack
+          image: localstack/localstack:latest
+          ports:
+            - containerPort: 4566
+            - containerPort: 4571
+          env:
+            - name: DOCKER_HOST
+              value: "unix:///var/run/docker.sock"
+            - name: LOCALSTACK_SERVICES
+              value: "s3,dynamodb"
+            - name: LOCALSTACK_HOSTNAME
+              value: "localhost"
+            - name: DEFAULT_REGION
+              value: "eu-west-1"
+            - name: EDGE_PORT
+              value: "4566"
+            - name: ENABLE_CONFIG_UPDATES
+              value: "1"
+            - name: DEBUG
+              value: "1"
+
